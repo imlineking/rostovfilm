@@ -93,15 +93,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Ponder-style diagonal hatch on black (subtle, sitewide) */
-    background-image:
-      repeating-linear-gradient(
-        45deg,
-        oklch(1 0 0 / 0.016) 0px,
-        oklch(1 0 0 / 0.016) 1px,
-        transparent 1px,
-        transparent 5px
-      );
+    /* Диагональную полосатую «ткань» перенесли в анимированный слой
+       .site-ambient::after — она дышит и слегка колышется волной */
   }
   ::selection {
     background: oklch(0.62 0.23 27 / 35%);
@@ -475,11 +468,56 @@
   }
 }
 
+/* ===== Полосатая «ткань» фона: диагональный узор, перенесённый с body.
+   Дышит (плавная пульсация прозрачности) и слегка колышется, как ткань:
+   слой большего размера медленно скользит вдоль полос и чуть наклоняется.
+   Только transform/opacity — анимация на GPU, без перерисовок. ===== */
+.site-ambient::after {
+  content: "";
+  position: absolute;
+  /* Слой заведомо больше экрана, чтобы скольжение и наклон не обнажали края
+     (клипуется overflow: hidden родителя) */
+  inset: -60%;
+  background-image: repeating-linear-gradient(
+    45deg,
+    oklch(1 0 0 / 0.016) 0px,
+    oklch(1 0 0 / 0.016) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+  animation:
+    hatch-sway 13s ease-in-out infinite alternate,
+    hatch-breathe 8s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+/* Колыхание: скольжение перпендикулярно полосам + лёгкий наклон + микро-масштаб */
+@keyframes hatch-sway {
+  from {
+    transform: translate3d(-0.35%, -0.35%, 0) rotate(-0.3deg) scale(1);
+  }
+  to {
+    transform: translate3d(0.35%, 0.35%, 0) rotate(0.3deg) scale(1.015);
+  }
+}
+/* Дыхание: полосы мягко проступают и притухают */
+@keyframes hatch-breathe {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ===== Кинетический отсчёт перенесён в src/app/countdown.css
    (оригинальный код CodePen «Kinetic countdown, CSS only») ===== */
 
 @media (prefers-reduced-motion: reduce) {
-  .site-ambient::before {
+  .site-ambient::before,
+  .site-ambient::after {
     animation: none;
+  }
+  .site-ambient::after {
+    opacity: 1;
   }
 }
