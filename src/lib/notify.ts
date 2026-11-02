@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { SITE_URL } from "@/lib/site-config";
 
 /**
  * Уведомления о новых заявках с сайта:
@@ -38,8 +39,6 @@ const FROM_NAME = process.env.STUDIO_FROM_NAME || "Сайт Ростовфиль
 const MAX_TOKEN = process.env.MAX_BOT_TOKEN;
 const MAX_CHAT_ID = process.env.MAX_CHAT_ID;
 const MAX_API = "https://platform-api2.max.ru";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 function escapeHtml(s: string) {
   return s

@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Oswald, Manrope } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { SITE } from "@/lib/site-data";
+import { SITE_URL } from "@/lib/site-config";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -40,9 +41,16 @@ const bricolage = Bricolage_Grotesque({
   axes: ["opsz", "wdth"],
 });
 
+const SEO_TITLE = "РОСТОВФИЛЬМ — киностудия полного цикла в Ростове-на-Дону";
+const SEO_DESCRIPTION = SITE.description;
+
 export const metadata: Metadata = {
-  title: "РОСТОВФИЛЬМ — киностудия полного цикла в Ростове-на-Дону",
-  description: SITE.description,
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SEO_TITLE,
+    template: "%s — РОСТОВФИЛЬМ",
+  },
+  description: SEO_DESCRIPTION,
   keywords: [
     "киностудия",
     "Ростов-на-Дону",
@@ -56,13 +64,43 @@ export const metadata: Metadata = {
     "Голос времени подкаст",
     "мультфильм Письмо",
   ],
+  applicationName: SITE.name,
+  authors: [{ name: SITE.fullName, url: SITE_URL }],
+  creator: SITE.fullName,
+  publisher: SITE.fullName,
+  category: "кинопроизводство",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "РОСТОВФИЛЬМ — киностудия полного цикла",
-    description: SITE.description,
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
     siteName: SITE.name,
     locale: "ru_RU",
     type: "website",
+    url: "/",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#201a18",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
 };
 
 const jsonLd = {
@@ -71,6 +109,10 @@ const jsonLd = {
   name: "Киностудия «Ростовфильм»",
   alternateName: "ROSTOVFILM",
   description: SITE.description,
+  slogan: SITE.tagline,
+  url: SITE_URL,
+  logo: `${SITE_URL}/icons/icon-512.png`,
+  image: `${SITE_URL}/icons/icon-512.png`,
   address: {
     "@type": "PostalAddress",
     addressLocality: "Ростов-на-Дону",
