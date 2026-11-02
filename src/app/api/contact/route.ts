@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { notifyNewRequest } from "@/lib/notify";
 import { verifyCaptcha } from "@/lib/captcha";
+import { checkRateLimit, clientIpFromHeaders } from "@/lib/rate-limit";
 
 const contactSchema = z.object({
   name: z
@@ -76,6 +77,24 @@ export async function POST(req: NextRequest) {
                 : "Неверный код с картинки — попробуйте ещё раз",
         },
         { status: 400 }
+      );
+    }
+
+    // Лимит заявок с одного IP (считаются только прошедшие капчу —
+    // живые заявки): защита базы и уведомлений от флуда
+    const ip = clientIpFromHeaders(req.headers);
+    const rate = checkRateLimit(ip);
+    if (!rate.allowed) {
+      const minutes = Math.max(1, Math.ceil(rate.retryAfterSec / 60));
+      console.log(
+        `[contact] лимит исчерпан (${ip}): ${rate.limit} заявок / ${rate.windowMin} мин, retry через ${rate.retryAfterSec}с`
+      );
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `Слишком много заявок с одного адреса — не больше ${rate.limit} за ${rate.windowMin} минут. Попробуйте через ${minutes} мин. или напишите нам в ВКонтакте — ссылка в разделе «Контакты».`,
+        },
+        { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } }
       );
     }
 

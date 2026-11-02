@@ -1,4 +1,5 @@
 import { SiteHeader } from "@/components/sections/site-header";
+import { BackToTop } from "@/components/sections/back-to-top";
 import { Hero } from "@/components/sections/hero";
 import { About } from "@/components/sections/about";
 import { Services } from "@/components/sections/services";
@@ -26,6 +27,7 @@ export default function Home() {
         <Contact />
       </main>
       <SiteFooter />
+      <BackToTop />
     </div>
   );
 }
