@@ -10,3 +10,6 @@ node_modules/
 
 # локальная база SQLite (схема пересоздаётся: bunx prisma db push)
 db/
+
+# сырьё и загрузки для работы (в git не попадают)
+upload/
