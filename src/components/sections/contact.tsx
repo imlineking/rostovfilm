@@ -29,7 +29,11 @@ const INITIAL: FormState = { name: "", contact: "", projectType: "", message: ""
 export function Contact() {
   const [form, setForm] = useState<FormState>(INITIAL);
   const [sending, setSending] = useState(false);
-  const [captchaSvg, setCaptchaSvg] = useState<string>("");
+  // Капча показывается через <img>: основной источник — data:-URL из base64
+  // (обходит санитайзеры/прокси, портящие SVG-разметку в JSON), резерв —
+  // прямой эндпоинт /api/captcha/image?t=<token>, если data:-URL не отрисовался.
+  const [captchaImg, setCaptchaImg] = useState<string>("");
+  const [captchaImgFallback, setCaptchaImgFallback] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string>("");
   const [captchaCode, setCaptchaCode] = useState<string>("");
   const [captchaLoading, setCaptchaLoading] = useState(true);
@@ -41,19 +45,40 @@ export function Contact() {
 
   const loadCaptcha = useCallback(async () => {
     setCaptchaLoading(true);
-    try {
-      const res = await fetch("/api/captcha", { cache: "no-store" });
-      if (!res.ok) throw new Error("captcha request failed");
-      const data: { svg: string; token: string } = await res.json();
-      setCaptchaSvg(data.svg);
-      setCaptchaToken(data.token);
-      setCaptchaCode("");
-    } catch {
-      setCaptchaSvg("");
-      setCaptchaToken("");
-    } finally {
-      setCaptchaLoading(false);
+    // до 3 попыток с паузой: на нагруженном шлюзе первый запрос иногда падает
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch("/api/captcha", { cache: "no-store" });
+        if (!res.ok) throw new Error(`captcha ${res.status}`);
+        const data: { svgB64?: string; svg?: string; token: string } =
+          await res.json();
+        if (!data.token) throw new Error("captcha: пустой токен");
+        setCaptchaToken(data.token);
+        setCaptchaCode("");
+        setCaptchaImgFallback(false);
+        if (data.svgB64) {
+          setCaptchaImg(`data:image/svg+xml;base64,${data.svgB64}`);
+        } else if (data.svg) {
+          // запасной путь, если base64 не приехал
+          setCaptchaImg(
+            `data:image/svg+xml;utf8,${encodeURIComponent(data.svg)}`
+          );
+        } else {
+          setCaptchaImg("");
+          setCaptchaImgFallback(true);
+        }
+        setCaptchaLoading(false);
+        return;
+      } catch (err) {
+        console.warn("[captcha] попытка загрузки не удалась:", err);
+        setCaptchaToken("");
+        setCaptchaImg("");
+        if (attempt < 3) {
+          await new Promise((r) => setTimeout(r, 800 * attempt));
+        }
+      }
     }
+    setCaptchaLoading(false);
   }, []);
 
   useEffect(() => {
@@ -271,10 +296,28 @@ export function Contact() {
                     >
                       {captchaLoading ? (
                         <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden />
-                      ) : captchaSvg ? (
-                        <span
-                          className="block [&>svg]:block"
-                          dangerouslySetInnerHTML={{ __html: captchaSvg }}
+                      ) : captchaImg ? (
+                        /* <img> вместо dangerouslySetInnerHTML: санитайзеры и CSP
+                           не могут «вычистить» картинку; при ошибке data:-URL
+                           переключаемся на прямой эндпоинт */
+                        <img
+                          src={
+                            captchaImgFallback && captchaToken
+                              ? `/api/captcha/image?t=${encodeURIComponent(captchaToken)}`
+                              : captchaImg
+                          }
+                          onError={() => {
+                            if (!captchaImgFallback && captchaToken) {
+                              setCaptchaImgFallback(true);
+                            } else {
+                              setCaptchaImg("");
+                            }
+                          }}
+                          width={170}
+                          height={54}
+                          alt=""
+                          className="block"
+                          decoding="async"
                         />
                       ) : (
                         <button

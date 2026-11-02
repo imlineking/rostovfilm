@@ -170,12 +170,13 @@ function drawNoise(width: number, height: number): string {
   return svg;
 }
 
-export function generateCaptcha(): { code: string; token: string; svg: string } {
-  const code = randomCode();
-  const token = createToken(code);
-
-  const width = 170;
-  const height = 54;
+/** Рисуем SVG-капчу для конкретного кода (дрожание/наклон случайны при каждом вызове). */
+export function drawCodeSvg(code: string): string {
+  // Размеры захардкожены НАРОЧНО: минификатор Turbopack при свёртке
+  // константных интерполяций вида ${width} портит хвост шаблонной строки
+  // (проверено: из бандла исчезает closing "> и SVG становится не-XML).
+  // Плюс без role/aria внутри: картинка вставляется через <img alt="",
+  // а роль и подпись уже на контейнерном div.
   const scale = 15; // высота цифры 30px
   const startX = 20;
   const gap = 12; // шаг между цифрами
@@ -191,7 +192,7 @@ export function generateCaptcha(): { code: string; token: string; svg: string } 
     const strokeWidth = rand(2.5, 3.2).toFixed(1);
     const opacity = rand(0.85, 1).toFixed(2);
 
-    const polylines = DIGIT_SEGS[digit]
+    const polylines = (DIGIT_SEGS[digit] ?? [])
       .map((segKey) => {
         const pts = segmentPath(SEGMENTS[segKey], scale, ox, oy);
         return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}"/>`;
@@ -201,12 +202,45 @@ export function generateCaptcha(): { code: string; token: string; svg: string } 
     chars += `<g transform="rotate(${rotate} ${cx.toFixed(1)} ${cy.toFixed(1)})">${polylines}</g>`;
   });
 
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Проверочный код">` +
-    `<rect width="${width}" height="${height}" fill="#201a18"/>` +
-    drawNoise(width, height) +
+  return (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="170" height="54" viewBox="0 0 170 54">' +
+    '<rect width="170" height="54" fill="#201a18"/>' +
+    drawNoise(170, 54) +
     chars +
-    `</svg>`;
+    "</svg>"
+  );
+}
 
-  return { code, token, svg };
+export function generateCaptcha(): { code: string; token: string; svg: string } {
+  const code = randomCode();
+  const token = createToken(code);
+  return { code, token, svg: drawCodeSvg(code) };
+}
+
+/**
+ * Достаём код из токена (проверяя подпись и срок) — чтобы отдать картинку
+ * отдельным эндпоинтом /api/captcha/image?t=<token> без хранения состояния.
+ */
+export function codeFromToken(token: string): string | null {
+  let decoded: string;
+  try {
+    decoded = Buffer.from(token, "base64url").toString("utf8");
+  } catch {
+    return null;
+  }
+  const [code, expStr, sig] = decoded.split(".");
+  if (!code || !expStr || !sig) return null;
+  if (!/^\d{4,8}$/.test(code) || !/^\d{13,16}$/.test(expStr)) return null;
+  const expected = Buffer.from(hmac(`${code}.${expStr}`), "hex");
+  let provided: Buffer;
+  try {
+    provided = Buffer.from(sig, "hex");
+  } catch {
+    return null;
+  }
+  if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
+    return null;
+  }
+  if (Date.now() > Number(expStr)) return null;
+  return code;
 }
