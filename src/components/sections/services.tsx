@@ -44,19 +44,19 @@ export function Services() {
           </Reveal>
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
           {SERVICES.map((service, i) => {
             const Icon = ICONS[service.icon] ?? Camera;
             return (
               <Reveal key={service.title} delay={0.05 * (i % 4)}>
-                <article className="group flex h-full flex-col rounded-md border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-accent/40 hover:shadow-lg hover:shadow-black/40">
-                  <span className="mb-5 flex size-11 items-center justify-center rounded-sm border border-primary/40 bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
-                    <Icon className="size-5" aria-hidden />
+                <article className="group flex h-full flex-col rounded-md border border-border bg-card p-3 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-accent/40 hover:shadow-lg hover:shadow-black/40 sm:p-6">
+                  <span className="mb-3 flex size-8 items-center justify-center rounded-sm border border-primary/40 bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground sm:mb-5 sm:size-11">
+                    <Icon className="size-4 sm:size-5" aria-hidden />
                   </span>
-                  <h3 className="font-display text-lg font-medium uppercase tracking-wider text-foreground">
+                  <h3 className="font-display text-[13px] font-medium uppercase leading-snug tracking-normal text-foreground sm:text-lg sm:tracking-wider">
                     {service.title}
                   </h3>
-                  <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
+                  <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground sm:mt-2.5 sm:text-sm">
                     {service.text}
                   </p>
                 </article>
