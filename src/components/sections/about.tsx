@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Reveal, SectionHeading } from "@/components/sections/reveal";
+import { RollingStat } from "@/components/sections/rolling-stat";
 import { PIPELINE, STATS } from "@/lib/site-data";
 
 export function About() {
@@ -32,17 +33,7 @@ export function About() {
 
             <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-4">
               {STATS.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="flex flex-col gap-1.5 bg-card px-4 py-5 transition-colors hover:bg-accent/60"
-                >
-                  <dt className="order-2 text-xs leading-snug text-muted-foreground">
-                    {stat.label}
-                  </dt>
-                  <dd className="order-1 font-display text-3xl font-semibold text-primary">
-                    {stat.value}
-                  </dd>
-                </div>
+                <RollingStat key={stat.label} value={stat.value} label={stat.label} />
               ))}
             </dl>
           </div>
@@ -80,9 +71,13 @@ export function About() {
               Полный цикл производства
             </h3>
           </Reveal>
-          <ol className="grid gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-            {PIPELINE.map((stage, i) => (
-              <li key={stage.step} className="group relative bg-card p-6 transition-colors hover:bg-accent/50">
+          <Reveal>
+            <ol className="grid gap-px overflow-hidden rounded-md border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+              {PIPELINE.map((stage, i) => (
+                <li
+                  key={stage.step}
+                  className="group relative bg-card p-6 transition-colors hover:bg-accent/50"
+                >
                 <span
                   className="pointer-events-none absolute right-4 top-3 font-display text-5xl font-bold text-foreground/5 transition-colors group-hover:text-primary/10"
                   aria-hidden
@@ -103,8 +98,9 @@ export function About() {
                   />
                 )}
               </li>
-            ))}
-          </ol>
+              ))}
+            </ol>
+          </Reveal>
         </div>
       </div>
     </section>

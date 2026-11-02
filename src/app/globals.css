@@ -85,6 +85,11 @@
   }
   html {
     scroll-behavior: smooth;
+    /* framer-motion useScroll({ target }) измеряет смещения относительно
+       скролл-контейнера (html). По умолчанию у html position: static —
+       framer в dev-режиме предупреждает об этом. relative безопасен:
+       на position: fixed потомков (шапка, прогресс-бар) не влияет. */
+    position: relative;
   }
   body {
     @apply bg-background text-foreground;
@@ -128,7 +133,7 @@
     font-family: var(--font-archangelsk), var(--font-oswald), sans-serif;
   }
 
-  /* Red gradient text (studio-logo red) */
+  /* Red gradient text (studio-logo red) + медленное «дыхание» блеска */
   .text-red-gradient {
     background: linear-gradient(
       100deg,
@@ -136,9 +141,72 @@
       oklch(0.62 0.23 27) 45%,
       oklch(0.5 0.19 20) 100%
     );
+    background-size: 180% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    animation: red-gradient-shift 9s ease-in-out infinite alternate;
+  }
+  @keyframes red-gradient-shift {
+    from {
+      background-position: 0% 50%;
+    }
+    to {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Блик, пробегающий по кнопке при наведении */
+  .btn-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-sheen::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(
+      105deg,
+      transparent,
+      oklch(1 0 0 / 28%),
+      transparent
+    );
+    transform: skewX(-20deg);
+    pointer-events: none;
+  }
+  .btn-sheen:hover::before {
+    animation: btn-sheen-run 0.9s ease;
+  }
+  @keyframes btn-sheen-run {
+    to {
+      left: 135%;
+    }
+  }
+
+  /* Подчёркивание навигационных ссылок, выезжающее слева */
+  .link-underline {
+    position: relative;
+  }
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    height: 1.5px;
+    width: 100%;
+    background: oklch(0.62 0.23 27 / 85%);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
   }
 
   /* Marquee ticker */
@@ -330,6 +398,13 @@
   .cyber-glitch::after,
   .cyber-caret::after {
     animation: none;
+  }
+  .text-red-gradient,
+  .btn-sheen::before,
+  .btn-sheen:hover::before,
+  .link-underline::after {
+    animation: none;
+    transition: none;
   }
 }
 

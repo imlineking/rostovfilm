@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown, Clapperboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MARQUEE_ITEMS, SITE } from "@/lib/site-data";
@@ -31,10 +31,24 @@ function useTimecode() {
 export function Hero() {
   const timecode = useTimecode();
 
+  // Параллакс при прокрутке: фон уезжает медленнее, контент — чуть быстрее
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+
   return (
-    <section id="top" className="film-grain relative flex min-h-svh flex-col overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0">
+    <section
+      ref={sectionRef}
+      id="top"
+      className="film-grain relative flex min-h-svh flex-col overflow-hidden"
+    >
+      {/* Background (параллакс) */}
+      <motion.div className="absolute inset-0" style={{ y: bgY }}>
         <Image
           src="/images/hero-bg.png"
           alt="Профессиональная кинокамера на площадке киностудии"
@@ -45,7 +59,7 @@ export function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_25%,oklch(0.13_0.01_25_/_0.88)_100%)]" />
-      </div>
+      </motion.div>
 
       {/* Letterbox bars */}
       <motion.div
@@ -77,17 +91,30 @@ export function Hero() {
             TC {timecode}
           </span>
         </div>
-        <span className="absolute left-6 top-32 border-l-2 border-t-2 border-foreground/30 p-4 lg:left-10 lg:top-36" />
-        <span className="absolute right-6 top-32 border-r-2 border-t-2 border-foreground/30 p-4 lg:right-10 lg:top-36" />
-        <span className="absolute bottom-24 left-6 border-b-2 border-l-2 border-foreground/30 p-4 lg:bottom-28 lg:left-10" />
-        <span className="absolute bottom-24 right-6 border-b-2 border-r-2 border-foreground/30 p-4 lg:bottom-28 lg:right-10" />
+        {[
+          "absolute left-6 top-32 border-l-2 border-t-2 border-foreground/30 p-4 lg:left-10 lg:top-36",
+          "absolute right-6 top-32 border-r-2 border-t-2 border-foreground/30 p-4 lg:right-10 lg:top-36",
+          "absolute bottom-24 left-6 border-b-2 border-l-2 border-foreground/30 p-4 lg:bottom-28 lg:left-10",
+          "absolute bottom-24 right-6 border-b-2 border-r-2 border-foreground/30 p-4 lg:bottom-28 lg:right-10",
+        ].map((cls, i) => (
+          <motion.span
+            key={cls}
+            initial={{ opacity: 0, scale: 1.15 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 1.35 + i * 0.12, ease: "easeOut" }}
+            className={cls}
+          />
+        ))}
         <span className="absolute right-6 top-1/2 hidden -translate-y-1/2 rotate-90 font-mono text-[10px] uppercase tracking-[0.4em] text-foreground/50 lg:right-10 lg:block">
           25 fps · 4K
         </span>
       </div>
 
       {/* Content */}
-      <div className="relative z-30 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 pb-24 pt-28 text-center sm:px-6 lg:px-8">
+      <motion.div
+        style={{ y: contentY, opacity: contentOpacity }}
+        className="relative z-30 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 pb-24 pt-28 text-center sm:px-6 lg:px-8"
+      >
         <motion.p
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -126,7 +153,7 @@ export function Hero() {
           <Button
             asChild
             size="lg"
-            className="glow-red h-12 bg-primary px-8 font-display text-base uppercase tracking-widest text-primary-foreground hover:bg-primary/85"
+            className="glow-red btn-sheen h-12 bg-primary px-8 font-display text-base uppercase tracking-widest text-primary-foreground hover:bg-primary/85"
           >
             <a href="#contacts">Обсудить проект</a>
           </Button>
@@ -139,7 +166,7 @@ export function Hero() {
             <a href="#projects">Смотреть проекты</a>
           </Button>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Scroll hint */}
       <motion.a

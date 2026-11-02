@@ -37,7 +37,14 @@ export function SectionHeading({
   return (
     <Reveal className={className}>
       <p className="mb-3 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
-        <span className="inline-block h-px w-10 bg-primary/70" aria-hidden />
+        <motion.span
+          initial={{ width: 0 }}
+          whileInView={{ width: "2.5rem" }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6, delay: 0.35, ease: [0.21, 0.65, 0.36, 1] }}
+          className="inline-block h-px bg-primary/70"
+          aria-hidden
+        />
         {overline}
       </p>
       <h2 className="font-display text-3xl font-semibold uppercase leading-tight tracking-wide text-foreground sm:text-4xl lg:text-5xl">

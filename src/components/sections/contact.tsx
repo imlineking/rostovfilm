@@ -362,7 +362,7 @@ export function Contact() {
                 <Button
                   type="submit"
                   disabled={sending || captchaLoading || !captchaToken}
-                  className="glow-red mt-1 h-12 bg-primary font-display text-base uppercase tracking-widest text-primary-foreground hover:bg-primary/85"
+                  className="glow-red btn-sheen mt-1 h-12 bg-primary font-display text-base uppercase tracking-widest text-primary-foreground hover:bg-primary/85"
                 >
                   {sending ? (
                     <>
