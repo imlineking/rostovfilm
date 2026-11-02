@@ -1,0 +1,208 @@
+/* Kinetic countdown (CSS only) — автор donotfold, CodePen.
+   Встроено «как есть»: @property-счётчик 9→0, сетка 5×5 окон, рост от центра.
+   Изменения пена — только скоупинг под .kinetic-countdown (вместо body/div/span)
+   и шрифт через переменную next/font. Логика и значения не тронуты.
+   Дальше — обёртка сцены (приглушение) и служебный слейв-текст
+   «свет/камера/мотор», вписанный в область цифр (надстройка сайта, не часть пена). */
+
+@property --number {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 9;
+}
+
+@property --zoom {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.kinetic-countdown-stage {
+  --size: 60vmin;
+  --columns: 5;
+  --cell-size: calc(var(--size) / var(--columns));
+
+  --speed: 1000ms;
+  --stagger: 50ms;
+
+  --scale-from: 0.2;
+  --scale-to: 1;
+  --scale-size: 0.7;
+
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Композиция поднята выше центра секции — чтобы отцентрованный
+     столбик слов оставался в свободной зоне над карточками */
+  padding-bottom: calc(var(--size) * 0.88);
+
+  pointer-events: none;
+
+  /* Фоновая подача: приглушаем, не меняя сам эффект */
+  opacity: 0.22;
+
+  color: #e0e0e0;
+}
+
+.kinetic-countdown {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(var(--columns), 1fr);
+  grid-template-rows: repeat(var(--columns), 1fr);
+
+  width: var(--size);
+  height: var(--size);
+}
+
+.kinetic-countdown span {
+  --x: 0;
+  --y: 0;
+  --dx: calc(var(--x) - (var(--columns) - 1) / 2);
+  --dy: calc(var(--y) - (var(--columns) - 1) / 2);
+
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.kinetic-countdown span:nth-of-type(5n + 1) { --x: 0; }
+.kinetic-countdown span:nth-of-type(5n + 2) { --x: 1; }
+.kinetic-countdown span:nth-of-type(5n + 3) { --x: 2; }
+.kinetic-countdown span:nth-of-type(5n + 4) { --x: 3; }
+.kinetic-countdown span:nth-of-type(5n + 5) { --x: 4; }
+
+.kinetic-countdown span:nth-of-type(n + 6) { --y: 1; }
+.kinetic-countdown span:nth-of-type(n + 11) { --y: 2; }
+.kinetic-countdown span:nth-of-type(n + 16) { --y: 3; }
+.kinetic-countdown span:nth-of-type(n + 21) { --y: 4; }
+
+.kinetic-countdown span:before {
+  --delay: calc(
+    (max(var(--dx), -1 * var(--dx)) + max(var(--dy), -1 * var(--dy))) *
+      var(--stagger)
+  );
+  --scale-t: calc(
+    var(--scale-from) + (var(--scale-to) - var(--scale-from)) * var(--zoom)
+  );
+  --scale-min: calc(var(--scale-size) / var(--columns));
+  --scale: calc(var(--scale-min) + (1 - var(--scale-min)) * var(--scale-t));
+
+  counter-reset: number var(--number);
+  content: counter(number);
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  font-family: var(--font-bricolage), sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-variation-settings: "wdth" 100;
+  font-style: normal;
+  font-size: calc(var(--size) / 0.73);
+  line-height: 1;
+  text-box: trim-both cap alphabetic;
+
+  transform: translate(-50%, -50%)
+    translate(
+      calc(var(--dx) * var(--cell-size) * var(--scale-t) * -1),
+      calc(var(--dy) * var(--cell-size) * var(--scale-t) * -1)
+    )
+    scale(var(--scale));
+
+  animation: countdown calc(var(--speed) * 10) steps(10, jump-none) infinite both,
+    grow calc(var(--speed) / 2) cubic-bezier(0.65, 0, 0.35, 1) infinite alternate
+      both;
+
+  animation-delay: 0s, var(--delay);
+}
+
+@keyframes countdown {
+  from {
+    --number: 9;
+  }
+  to {
+    --number: 0;
+  }
+}
+
+@keyframes grow {
+  to {
+    --zoom: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kinetic-countdown span:before {
+    animation: none;
+  }
+}
+
+/* --- Слейв съёмки (надстройка сайта, не часть пена):
+      СВЕТ / КАМЕРА / МОТОР — столбик, вписанный ровно в область цифр
+      (ширина и высота = сетке 5×5), отцентрован по обеим осям,
+      шрифт Benzin ExtraBold; строки посажены максимально плотно;
+      все слова идут разом одним кадром — вместе с нулём отсчёта
+      (последние 10% цикла) --- */
+
+.kinetic-slate {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.02em;
+
+  width: var(--size);
+  height: var(--size);
+
+  font-family: var(--font-benzin), var(--font-bricolage), sans-serif;
+  font-weight: 800;
+  font-size: calc(var(--size) * 0.125);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+
+  /* Светлые по тёмному, тёмные по штрихам цифры — слова читаемы всегда */
+  mix-blend-mode: difference;
+
+  opacity: 0;
+  animation: kinetic-slate calc(var(--speed) * 10) linear infinite both;
+}
+
+.kinetic-slate span {
+  display: block;
+  /* Компенсация трейлинг-letter-spacing — оптическое центрирование */
+  text-indent: 0.04em;
+}
+
+/* На узких экранах композиция — вверху секции, над карточками */
+@media (max-width: 1023px) {
+  .kinetic-countdown-stage {
+    place-items: start center;
+    padding-bottom: 0;
+    padding-top: 1rem;
+  }
+}
+
+@keyframes kinetic-slate {
+  0%,
+  88% {
+    opacity: 0;
+  }
+  90%,
+  97% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kinetic-slate {
+    animation: none;
+  }
+}

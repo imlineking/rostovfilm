@@ -1,2 +1,9 @@
 skills/
 node_modules/
+.next/
+*.log
+.zscripts/
+.initial_snapshot.json
+
+# локальные секреты
+.env*.local

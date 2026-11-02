@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#100b0d">
+<meta name="description" content="Cyber Scum — полнометражный анимационный фильм. Автор проекта Дмитрий Демиденко (Хануман). Киностудия Ростов Фильм.">
+<title>Cyber Scum — Ростов Фильм</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23100b0d'/%3E%3Cpath d='M20 14h25v9H29v9h14v9H29v13h-9z' fill='%23ff3434'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/fonts.css"><link rel="stylesheet" href="hero.css"><script src="hero.js" defer></script>
+</head>
+<body>
+<main class="hero" id="hero" data-scene="0" aria-label="Cyber Scum — анимационный проект Ростов Фильм">
+  <div class="backdrop" aria-hidden="true">
+    <video class="scene-media active" id="media-0" autoplay muted loop playsinline preload="auto" poster="assets/cyber-01.jpg"><source src="assets/cyber-01.mp4" type="video/mp4"></video>
+    <video class="scene-media" id="media-1" muted loop playsinline preload="metadata" poster="assets/cyber-02.jpg"><source src="assets/cyber-02.mp4" type="video/mp4"></video>
+    <video class="scene-media broadcast" id="media-2" muted loop playsinline preload="metadata" poster="assets/cyber-03.jpg"><source src="assets/cyber-03.mp4" type="video/mp4"></video>
+    <img class="scene-media scene-image" id="media-3" src="assets/cyber-04.png" alt="">
+    <div class="video-shade"></div><div class="film-grain"></div><div class="scanlines"></div>
+  </div>
+  <header class="masthead"><a class="brand" href="#" aria-label="Ростов Фильм — первая сцена"><img src="assets/rostov-film.png" alt="Киностудия Ростов Фильм" width="224" height="36"></a></header>
+  <section class="stage" aria-label="Текущая сцена">
+    <canvas id="glitch-canvas" aria-hidden="true"></canvas>
+    <div class="scene-label"><span class="label-line" aria-hidden="true"></span><span id="scene-label">01 / АНИМАЦИОННОЕ КИНО</span></div>
+    <div class="hero-copy">
+      <div class="project-tags"><span class="status">В ПРОЕКТЕ</span><span>КИБЕРПАНК · ПОСТАПОКАЛИПСИС</span></div>
+      <h1 id="headline">CYBER<br><span>SCUM</span></h1>
+      <div class="glass-panel">
+        <span class="panel-corner" aria-hidden="true"></span>
+        <p class="panel-kicker" id="panel-kicker">ПОСТАПОКАЛИПСИС, КОТОРОГО ВЫ ЖДАЛИ</p>
+        <p class="panel-description" id="description">Raven переносит сознание между телами, противостоит тирании корпораций и ищет способ вернуть миру человечность.</p>
+        <p class="project-author">ДМИТРИЙ ДЕМИДЕНКО <span>(ХАНУМАН)</span></p>
+        <button class="scene-cta" id="scene-cta"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path d="m8 4 12 8-12 8z"/></svg><span>Смотреть отрывок</span></button>
+      </div>
+    </div>
+  </section>
+  <aside class="scene-controls" aria-label="Управление кадрами">
+    <nav class="scene-selector" aria-label="Выбрать кадр">
+      <button class="scene-choice selected" data-scene="0" aria-label="Кадр 1 — Cyber Scum" aria-current="true"><span>01</span><i aria-hidden="true"></i></button>
+      <button class="scene-choice" data-scene="1" aria-label="Кадр 2 — Перенос сознания"><span>02</span><i aria-hidden="true"></i></button>
+      <button class="scene-choice" data-scene="2" aria-label="Кадр 3 — Мир корпораций"><span>03</span><i aria-hidden="true"></i></button>
+      <button class="scene-choice" data-scene="3" aria-label="Кадр 4 — Остаться человеком"><span>04</span><i aria-hidden="true"></i></button>
+    </nav>
+    <button class="pause-button" id="pause-button" aria-label="Приостановить воспроизведение" aria-pressed="false"><svg class="progress-ring" viewBox="0 0 48 48" aria-hidden="true"><circle class="ring-track" cx="24" cy="24" r="21"/><circle class="ring-progress" id="ring-progress" cx="24" cy="24" r="21"/></svg><span id="pause-icon" aria-hidden="true">Ⅱ</span></button>
+  </aside>
+  <p id="scene-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+</main>
+<dialog id="film-dialog" aria-labelledby="dialog-title">
+  <div class="dialog-heading"><div><span class="dialog-eyebrow">CYBER SCUM / РАБОЧИЙ МАТЕРИАЛ</span><h2 id="dialog-title">Cyber Scum</h2></div><button class="close-button" id="close-dialog" aria-label="Закрыть окно">×</button></div>
+  <video id="dialog-video" controls playsinline preload="none"></video>
+  <p class="dialog-footnote">Полнометражный анимационный фильм · в проекте<br>Автор — Дмитрий Демиденко (Хануман)</p>
+</dialog>
+</body>
+</html>
